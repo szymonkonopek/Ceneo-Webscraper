@@ -3,7 +3,7 @@ from urllib import request
 from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import soup
+from soup import Product
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ceneo.db'
@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 class Ceneo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     author_name = db.Column(db.String(200), nullable = False)
-    rev
+    opinion_text = db.Column(db.String(200), nullable = False)
     completed = db.Column(db.Integer, default = 0)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
 
@@ -22,11 +22,23 @@ class Ceneo(db.Model):
 @app.route('/',methods = ['POST', 'GET'])
 def index():
     if request.method == "POST":
-        task_content = request.form['content'] #content z form z html
-        new_task = Ceneo(content = task_content)
-
+        form_content = request.form['content'] #content z form z html
         try:
-            db.session.add(new_task)
+            if form_content == None or "":
+                return
+            opinions = Product(form_content).download_opinions()
+            tasks = []
+            
+            for opinion in opinions:
+                data = opinion.get_data()
+                author_name = data["author_name"]
+                opinion_text = data["opinion_text"]
+                task = Ceneo(author_name = author_name, opinion_text = opinion_text)
+                tasks.append(task)
+
+        
+            for task in tasks:
+                db.session.add(task)
             db.session.commit()
             return redirect('/')
         except:
@@ -35,12 +47,6 @@ def index():
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
         return render_template('index.html', tasks = tasks)
-
-@app.route('/get_opinion/<int:id>')
-def get_opinion(id):
-    if request.method == "POST":
-        prod_obj = Product.download_opinions()
-        opinions = prod_obj.get_opinions()
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -58,7 +64,7 @@ def update(id):
     task = Ceneo.query.get_or_404(id)
 
     if request.method == 'POST':
-        task.content = request.form['content']
+        task.author_name = request.form['content']
 
         try:
             db.session.commit()

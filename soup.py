@@ -53,6 +53,7 @@ class Product:
                 print(str(opinion_text), end="\n\n")
 
             opinion_page += 1
+        return self.opinions
 
     def get_opinions(self):
         return self.opinions
@@ -66,11 +67,3 @@ class Product:
 
         json_obj["all_opinions"].append({"id" : self.id, "opinions" : data_array})
         return json.dumps(json_obj, indent = 4)
-
-product_obj = Product("94823130")
-product_obj.download_opinions()
-
-json_obj = product_obj.create_json()
-with open("data.json","w") as file:
-    file.write(json_obj)
-print("hello")
