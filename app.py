@@ -19,14 +19,15 @@ class Ceneo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
 
-@app.route('/',methods = ['POST', 'GET'])
-def index():
+@app.route('/extraction',methods = ['POST', 'GET'])
+def extraction():
     if request.method == "POST":
         form_content = request.form['content'] #content z form z html
         try:
             if form_content == None or "":
                 return
-            opinions = Product(form_content).download_opinions()
+            prod_obj = Product(form_content)
+            opinions = prod_obj.download_opinions()
             tasks = []
             
             for opinion in opinions:
@@ -40,13 +41,13 @@ def index():
             for task in tasks:
                 db.session.add(task)
             db.session.commit()
-            return redirect('/')
+            return redirect(f'/product-page/{prod_obj.id}')
         except:
             return "There was an issue :("
 
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
-        return render_template('index.html', tasks = tasks)
+        return render_template('extraction.html', tasks = tasks)
 
 @app.route('/delete/<int:id>')
 def delete(id):
@@ -55,7 +56,7 @@ def delete(id):
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/')
+        return redirect('/product-page/1')
     except:
         return "There was an error :("
 
@@ -68,12 +69,28 @@ def update(id):
 
         try:
             db.session.commit()
-            return redirect('/')
+            return redirect('/extraction')
         except:
             return "Error updating :("
     else:
         return render_template('update.html',task = task)
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/product-list')
+def product_list():
+    return render_template('product-list.html')
+
+@app.route('/author')
+def author():
+    return render_template('author.html')
+
+@app.route('/product-page/<int:id>', methods = ['GET','POST'])
+def product_page(id):
+    tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
+    return render_template('product-page.html',tasks = tasks, id = id)
 
 if __name__ == "__main__":
     app.run(debug = True)

@@ -57,6 +57,9 @@ class Product:
 
     def get_opinions(self):
         return self.opinions
+    
+    def get_id(self):
+        return self.id
 
     def create_json(self):
         json_obj = {"all_opinions" : []}
