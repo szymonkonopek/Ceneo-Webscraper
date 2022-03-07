@@ -16,14 +16,21 @@
         <table>
             <tr>
                 <th>Products</th>
+                <th>Link</th>
+                <th>Delete</th>
             </tr>
+            {% set count = 0%}
             {% for product in unique_products %}
                     <tr>
-                        <td>{{ product }}</td>
+                        <td>{{ product["name"] }}</td>
                         <td>
-                            <a href="/product-page/{{product}}">Link</a>
+                            <a href="/product-page/{{product['id']}}">Link</a>
+                        </td>
+                        <td>
+                            <a href="/delete-page/{{product['id']}}">Delete</a>
                         </td>
                     </tr>
+                {% set count = 1 %}
             {% endfor%}
         </table>
         {% endif %}

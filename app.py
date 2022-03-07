@@ -16,13 +16,14 @@ class Ceneo(db.Model):
     opinion_text = db.Column(db.String(200), nullable = False)
     recommended = db.Column(db.Boolean, nullable = False)
     score_count = db.Column(db.String(200), nullable = False)
-    credibility = db.Column(db.String(200), nullable = False)
+    credibility = db.Column(db.Boolean(200), nullable = False)
     upvotes = db.Column(db.String(200), nullable = False)
     downvotes = db.Column(db.String(200), nullable = False)
     purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
     review_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
     advantages = db.Column(db.String(200), nullable = False)
     disadvantages = db.Column(db.String(200), nullable = False)
+    product_name = db.Column(db.String(200), nullable = False)
 
     completed = db.Column(db.Integer, default = 0)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
@@ -55,8 +56,12 @@ def extraction():
                 review_date = data["review_date"]
                 advantages = data["advantages"]
                 disadvantages = data["disadvantages"]
+                product_name = data["product_name"]
 
-                task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id, recommended = recommended, score_count=score_count, credibility=credibility,upvotes=upvotes,downvotes=downvotes,purchase_date=purchase_date,review_date=review_date,advantages=advantages,disadvantages=disadvantages)
+                task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id,
+                recommended = recommended, score_count=score_count, credibility=credibility,upvotes=upvotes,
+                downvotes=downvotes,purchase_date=purchase_date,review_date=review_date,advantages=advantages,
+                disadvantages=disadvantages, product_name = product_name)
                 tasks.append(task)
 
         
@@ -85,6 +90,22 @@ def delete(product_id,id,length):
     except:
         return "There was an error :("
 
+@app.route('/delete-page/<int:id>')
+def delete_page(id):
+    tasks = Ceneo.query.order_by(Ceneo.date_created).all()
+    tasks_ids = []
+    for task in tasks:
+        if task.product_id == str(id):
+            tasks_ids.append(task.id)
+    for id in tasks_ids:
+        try:
+            task_to_delete = Ceneo.query.get_or_404(id)
+            db.session.delete(task_to_delete)
+            db.session.commit()
+        except:
+            print("problem")
+    return redirect("/product-list")
+
 @app.route('/update/<int:id>', methods = ['GET','POST'])
 def update(id):
     task = Ceneo.query.get_or_404(id)
@@ -107,11 +128,13 @@ def index():
 @app.route('/product-list')
 def product_list():
     tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
+    unique_ids = []
     unique_products = []
     for task in tasks:
-        if task.product_id not in unique_products:
-            unique_products.append(str(task.product_id))
-        
+        if task.product_id not in unique_ids:
+            unique_ids.append(str(task.product_id))
+            unique_products.append({"id": task.product_id,"name": task.product_name })
+
     return render_template('product-list.html', unique_products = unique_products)
 
 @app.route('/author')

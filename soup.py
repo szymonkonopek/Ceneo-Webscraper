@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 class Opinion:
-    def __init__(self,product_id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages):
+    def __init__(self,product_id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name):
         self.product_id = product_id
         self.opinion_text = opinion_text
         self.author_name = author_name
@@ -20,13 +20,14 @@ class Opinion:
         self.downvotes = downvotes
         self.advantages = advantages
         self.disadvantages = disadvantages
+        self.product_name = product_name
     
     def get_data(self):
         return {"product_id" : self.product_id,"author_name" : self.author_name, "opinion_text" : self.opinion_text,
         "recommended" : self.recommended, "score_count":self.score_count,
         "credibility" : self.credibility, "purchase_date" : self.purchase_date, "review_date" : self.review_date,
         "upvotes" : self.upvotes, "downvotes" : self.downvotes,
-        "advantages" : self.advantages,"disadvantages" : self.disadvantages}
+        "advantages" : self.advantages,"disadvantages" : self.disadvantages, "product_name" : self.product_name}
 
 class Product:
     def __init__(self,id):
@@ -51,7 +52,7 @@ class Product:
 
         count_element = soup.find("a",{"class" : "product-review__link link link--accent js_reviews-link js_clickHash js_seoUrl"})
         opinion_count = int(count_element.find("span").string)
-
+        product_name = soup.find("h1",{"class" : "product-top__product-info__name js_product-h1-link js_product-force-scroll js_searchInGoogleTooltip default-cursor"}).get_text()
         opinion_page = 1
 
         for i in range(int(math.ceil(opinion_count/10))):
@@ -65,15 +66,24 @@ class Product:
                 author_name = opinion.find("span",{"class" : "user-post__author-name"}).get_text()
                 opinion_text = opinion.find("div",{"class" : "user-post__text"}).get_text()
                 score_count = opinion.find("span",{"class" : "user-post__score-count"}).get_text()
-                credibility = opinion.find("div",{"class" : "review-pz"}).find("em").get_text()
                 upvotes = opinion.find("button", {"class" : "vote-yes js_product-review-vote js_vote-yes"}).find("span").get_text()
                 downvotes = opinion.find("button", {"class" : "vote-no js_product-review-vote js_vote-no"}).find("span").get_text()
 
-                recommended = opinion.find("span",{"class" : "user-post__author-recomendation"}).find("em").get_text()
-                if recommended == "Polecam":
-                    recommended = True
-                else:
+                try:
+                    credibility = opinion.find("div",{"class" : "review-pz"}).find("em").get_text()
+                    credibility = True
+                except:
+                    credibility = False
+
+                try:
+                    recommended = opinion.find("span",{"class" : "user-post__author-recomendation"}).find("em").get_text()
+                    if recommended == "Polecam":
+                        recommended = True
+                    else:
+                        recommended = False
+                except:
                     recommended = False
+
 
                 dates = opinion.find("span",{"class" : "user-post__published"}).find_all("time")
                 purchase_date = dates[0].attrs["datetime"]
@@ -98,7 +108,7 @@ class Product:
                         disadvantages.append(comment.get_text())
                     disadvantages = ','.join(disadvantages)
 
-                self.add_opinion(Opinion(self.id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages))
+                self.add_opinion(Opinion(self.id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name))
                 print(str(opinion_text), end="\n\n")
 
             opinion_page += 1
@@ -119,9 +129,4 @@ class Product:
 
         json_obj["all_opinions"].append({"id" : self.id, "opinions" : data_array})
         return json.dumps(json_obj, indent = 4)
-
-
-prod = Product("32983216")
-opinions = prod.download_opinions()
-
 print("hello")
