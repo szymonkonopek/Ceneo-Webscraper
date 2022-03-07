@@ -52,7 +52,7 @@ class Product:
 
         count_element = soup.find("a",{"class" : "product-review__link link link--accent js_reviews-link js_clickHash js_seoUrl"})
         opinion_count = int(count_element.find("span").string)
-        product_name = soup.find("h1",{"class" : "product-top__product-info__name js_product-h1-link js_product-force-scroll js_searchInGoogleTooltip default-cursor"}).get_text()
+        product_name = soup.find("h1",{"class" : "product-top__product-info__name"}).get_text()
         opinion_page = 1
 
         for i in range(int(math.ceil(opinion_count/10))):
@@ -129,4 +129,5 @@ class Product:
 
         json_obj["all_opinions"].append({"id" : self.id, "opinions" : data_array})
         return json.dumps(json_obj, indent = 4)
+
 print("hello")

@@ -1,9 +1,11 @@
 from asyncio import tasks
 from urllib import request
 from flask import Flask, render_template, url_for, request, redirect
+from flask_table import Table, Col
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from soup import Product
+import pandas as pd
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ceneo.db'
@@ -30,6 +32,19 @@ class Ceneo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
+
+class SortableTable(Table):
+    id = Col('ID')
+    name = Col('Name')
+    description = Col('Description')
+    allow_sort = True
+
+    def sort_url(self, col_key, reverse=False):
+        if reverse:
+            direction = 'desc'
+        else:
+            direction = 'asc'
+        return url_for(request.endpoint, **request.view_args, sort=col_key, direction=direction)
 
 @app.route('/extraction',methods = ['POST', 'GET'])
 def extraction():
@@ -70,7 +85,8 @@ def extraction():
             db.session.commit()
             return redirect(f'/product-page/{prod_obj.id}')
         except Exception as e:
-            return str(e)
+            print(e)
+            return redirect('/extraction')
 
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
@@ -143,8 +159,25 @@ def author():
 
 @app.route('/product-page/<int:id>', methods = ['GET','POST'])
 def product_page(id):
-    tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
-    return render_template('product-page.html',tasks = tasks, id = str(id))
+    tasks = Ceneo.query.order_by(Ceneo.date_created).all()
+    
+    tasks_array = []
+    for task in tasks:
+        task_array = [task.author_name,task.opinion_text,task.credibility]
+        tasks_array.append(task_array)
+    
+    df = pd.DataFrame(tasks_array, columns=["id", "name", "description"])
+    
+    sort = request.args.get('sort', 'id')
+    reverse = (request.args.get('direction', 'asc') == 'desc')
+
+    df = df.sort_values(by=[sort], ascending=reverse)
+    output_dict = df.to_dict(orient='records')
+
+    sort_table = SortableTable(output_dict,sort_by=sort,sort_reverse=reverse)
+
+    
+    return render_template('product-page.html',tasks = tasks, id = str(id), sort_table = sort_table)
 
 if __name__ == "__main__":
     app.run(debug = True)

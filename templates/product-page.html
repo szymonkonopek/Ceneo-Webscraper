@@ -14,7 +14,7 @@
         {% else %}
         
         <h1>Extraction</h1>
-        
+        {{sort_table}}
         <table>
             <tr>
                 <th>Author</th>
@@ -22,7 +22,7 @@
                 <th>Actions</th>
             </tr>
             {% for task in tasks %}
-                {% if task.product_id == id %}
+                {% if task.product_id == id %}<!--id-->
                     <tr>
                         <td>{{ task.author_name }}</td>
                         <td>{{ task.opinion_text }}</td>
