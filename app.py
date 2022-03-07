@@ -11,6 +11,7 @@ db = SQLAlchemy(app)
 
 class Ceneo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
+    product_id = db.Column(db.String(200), nullable = False)
     author_name = db.Column(db.String(200), nullable = False)
     opinion_text = db.Column(db.String(200), nullable = False)
     completed = db.Column(db.Integer, default = 0)
@@ -24,8 +25,6 @@ def extraction():
     if request.method == "POST":
         form_content = request.form['content'] #content z form z html
         try:
-            if form_content == None or "":
-                return
             prod_obj = Product(form_content)
             opinions = prod_obj.download_opinions()
             tasks = []
@@ -34,7 +33,8 @@ def extraction():
                 data = opinion.get_data()
                 author_name = data["author_name"]
                 opinion_text = data["opinion_text"]
-                task = Ceneo(author_name = author_name, opinion_text = opinion_text)
+                product_id = data["product_id"]
+                task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id)
                 tasks.append(task)
 
         
@@ -49,14 +49,17 @@ def extraction():
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
         return render_template('extraction.html', tasks = tasks)
 
-@app.route('/delete/<int:id>')
-def delete(id):
+@app.route('/delete/<int:product_id>/<int:id>/<int:length>')
+def delete(product_id,id,length):
     task_to_delete = Ceneo.query.get_or_404(id)
 
     try:
         db.session.delete(task_to_delete)
         db.session.commit()
-        return redirect('/product-page/1')
+        if length > 1:
+            return redirect(f'/product-page/{product_id}')
+        else:
+            return redirect('/product-list')
     except:
         return "There was an error :("
 
@@ -81,7 +84,13 @@ def index():
 
 @app.route('/product-list')
 def product_list():
-    return render_template('product-list.html')
+    tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
+    unique_products = []
+    for task in tasks:
+        if task.product_id not in unique_products:
+            unique_products.append(str(task.product_id))
+        
+    return render_template('product-list.html', unique_products = unique_products)
 
 @app.route('/author')
 def author():
@@ -90,7 +99,7 @@ def author():
 @app.route('/product-page/<int:id>', methods = ['GET','POST'])
 def product_page(id):
     tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
-    return render_template('product-page.html',tasks = tasks, id = id)
+    return render_template('product-page.html',tasks = tasks, id = str(id))
 
 if __name__ == "__main__":
     app.run(debug = True)

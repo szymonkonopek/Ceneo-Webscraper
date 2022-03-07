@@ -2,19 +2,19 @@
 
 
 {% block title %}
-    <h1>Task Master</h1>
+    <h1>Ceneo</h1>
 {% endblock%}
 
 {% block body %}
     <div class = "content">
         <h1>Product Page {{id}}</h1>
-
+        <a href="/">Home</a>
         {% if tasks|length < 1 %}
-        <h4>No entries :(</h4>
+            <h4>No entries :(</h4>
         {% else %}
         
         <h1>Extraction</h1>
-        <a href="/">Home</a>
+        
         <table>
             <tr>
                 <th>Author</th>
@@ -22,15 +22,18 @@
                 <th>Actions</th>
             </tr>
             {% for task in tasks %}
-            <tr>
-                <td>{{ task.author_name }}</td>
-                <td>{{ task.opinion_text }}</td>
-                <td>
-                    <a href="/delete/{{task.id}}">Delete</a>
-                    <br>
-                    <a href="/update/{{task.id}}">Update</a>
-                </td>
-            </tr>
+                {% if task.product_id == id %}
+                    <tr>
+                        <td>{{ task.author_name }}</td>
+                        <td>{{ task.opinion_text }}</td>
+                        <td>{{task.product_id}}</td>
+                        <td>
+                            <a href="/delete/{{task.product_id}}/{{task.id}}/{{tasks|length}}">Delete</a>
+                            <br>
+                            <a href="/update/{{task.id}}">Update</a>
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor%}
         </table>
         {% endif %}

@@ -2,12 +2,31 @@
 
 
 {% block title %}
-    <h1>Task Master</h1>
+    <h1>Ceneo</h1>
 {% endblock%}
 
 {% block body %}
     <div class = "content">
         <h1>Product List</h1>
         <a href="/extraction">Extraction</a>
+
+        {% if unique_products|length < 1 %}
+        <h4>No entries :(</h4>
+        {% else %}
+        <table>
+            <tr>
+                <th>Products</th>
+            </tr>
+            {% for product in unique_products %}
+                    <tr>
+                        <td>{{ product }}</td>
+                        <td>
+                            <a href="/product-page/{{product}}">Link</a>
+                        </td>
+                    </tr>
+            {% endfor%}
+        </table>
+        {% endif %}
+
     </div>
 {% endblock%}
