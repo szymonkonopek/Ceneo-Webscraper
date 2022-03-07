@@ -14,6 +14,16 @@ class Ceneo(db.Model):
     product_id = db.Column(db.String(200), nullable = False)
     author_name = db.Column(db.String(200), nullable = False)
     opinion_text = db.Column(db.String(200), nullable = False)
+    recommended = db.Column(db.Boolean, nullable = False)
+    score_count = db.Column(db.String(200), nullable = False)
+    credibility = db.Column(db.String(200), nullable = False)
+    upvotes = db.Column(db.String(200), nullable = False)
+    downvotes = db.Column(db.String(200), nullable = False)
+    purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
+    review_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
+    advantages = db.Column(db.String(200), nullable = False)
+    disadvantages = db.Column(db.String(200), nullable = False)
+
     completed = db.Column(db.Integer, default = 0)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
 
@@ -25,16 +35,28 @@ def extraction():
     if request.method == "POST":
         form_content = request.form['content'] #content z form z html
         try:
+            print("done")
             prod_obj = Product(form_content)
             opinions = prod_obj.download_opinions()
             tasks = []
             
+
             for opinion in opinions:
                 data = opinion.get_data()
                 author_name = data["author_name"]
                 opinion_text = data["opinion_text"]
                 product_id = data["product_id"]
-                task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id)
+                recommended = data["recommended"]
+                score_count = data["score_count"]
+                credibility = data["credibility"]
+                upvotes = data["upvotes"]
+                downvotes = data["downvotes"]
+                purchase_date = data["purchase_date"]
+                review_date = data["review_date"]
+                advantages = data["advantages"]
+                disadvantages = data["disadvantages"]
+
+                task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id, recommended = recommended, score_count=score_count, credibility=credibility,upvotes=upvotes,downvotes=downvotes,purchase_date=purchase_date,review_date=review_date,advantages=advantages,disadvantages=disadvantages)
                 tasks.append(task)
 
         
@@ -42,8 +64,8 @@ def extraction():
                 db.session.add(task)
             db.session.commit()
             return redirect(f'/product-page/{prod_obj.id}')
-        except:
-            return "There was an issue :("
+        except Exception as e:
+            return str(e)
 
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
@@ -103,3 +125,4 @@ def product_page(id):
 
 if __name__ == "__main__":
     app.run(debug = True)
+
