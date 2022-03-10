@@ -27,7 +27,7 @@
             {% for product in unique_products %}
                     <tr>
                         <td>
-                            <a href="/product-page/{{product['id']}}">{{ product["name"] }}</a>
+                            <a href="/product-page/{{product['id']}}"  class ="product-list">{{ product["name"] }}</a>
                         </td>
                         <td>
                             {{product["number_of_opinions"]}}
@@ -42,7 +42,7 @@
                             {{product["average_score"]}}
                         </td>
                         <td>
-                            <a href="/download-json/{{product['id']}}">Download</a>
+                            <a href="/download-json/{{product['id']}}" class ="product-list">Download</a>
                         </td>
                         <td>
                             <a href="/delete-page/{{product['id']}}" class = "delete">X</a>
