@@ -8,7 +8,7 @@
 {% block body %}
     <div class = "content">
         <h1>Product List</h1>
-        <a href="/extraction">Extraction</a>
+
 
         {% if unique_products|length < 1 %}
         <h4>No entries :(</h4>
@@ -16,19 +16,22 @@
         <table>
             <tr>
                 <th>Products</th>
-                <th>Link</th>
+                <th>JSON</th>
                 <th>Delete</th>
             </tr>
             {% set count = 0%}
             {% for product in unique_products %}
                     <tr>
-                        <td>{{ product["name"] }}</td>
                         <td>
-                            <a href="/product-page/{{product['id']}}">Link</a>
+                            <a href="/product-page/{{product['id']}}">{{ product["name"] }}</a>
                         </td>
                         <td>
-                            <a href="/delete-page/{{product['id']}}">Delete</a>
+                            <a href="/download-json/{{product['id']}}">Download</a>
                         </td>
+                        <td>
+                            <a href="/delete-page/{{product['id']}}" class = "delete">X</a>
+                        </td>
+
                     </tr>
                 {% set count = 1 %}
             {% endfor%}

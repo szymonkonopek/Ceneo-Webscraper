@@ -7,36 +7,71 @@
 
 {% block body %}
     <div class = "content">
-        <h1>Product Page {{id}}</h1>
-        <a href="/">Home</a>
-        {% if tasks|length < 1 %}
-            <h4>No entries :(</h4>
-        {% else %}
-        
-        <h1>Extraction</h1>
-        {{sort_table}}
-        <table>
-            <tr>
-                <th>Author</th>
-                <th>Text</th>
-                <th>Actions</th>
-            </tr>
-            {% for task in tasks %}
-                {% if task.product_id == id %}<!--id-->
-                    <tr>
-                        <td>{{ task.author_name }}</td>
-                        <td>{{ task.opinion_text }}</td>
-                        <td>{{task.credibility}}</td>
-                        <td>
-                            <a href="/delete/{{task.product_id}}/{{task.id}}/{{tasks|length}}">Delete</a>
-                            <br>
-                            <a href="/update/{{task.id}}">Update</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endfor%}
-        </table>
-        {% endif %}
+        <div class = "home-container">
+            <div class = "home-container-title">Product Page {{id}}</div>
+            <div class = "home-container-title">{{product_name}}</div>
+            <div class = "home-container-desc">Click below to view all the charts.</div>
+            <div class = "home-container-buttons">
+                <a href="/product-page/{{id}}/charts">Statistics</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class = "content">
+        <div class = "home-container">
+            <div class = "home-container-title">Description</div>
+            <div class ="home-container-desc">
+                <span>Author:</span> Username of the person who wrote the review, directly taken from the website.
+            </div>
+            <div class ="home-container-desc">
+                <span>Opinion: </span> Final opinion. Boolean value (True = POSITIVE, False = NEGATIVE).
+            </div>
+            <div class ="home-container-desc">
+                <span>Rating: </span> Product rating from 0.5 to 5 out of 5. 
+            </div>
+            <div class ="home-container-desc">
+                <span>Usefulness: </span>Difference between positive and negative reactions to the comment.
+            </div>
+            <div class ="home-container-desc">
+                <span>Upsides: </span>List of all upsides listed by the user.
+            </div>
+            <div class ="home-container-desc">
+                <span>Downsides: </span>List of all downsides listed by the user.
+            </div>
+            <div class ="home-container-desc">
+                <span>Confirmed: </span>Confirmed purchase. Boolean value (True = Yes, False = No).
+            </div>
+            <div class ="home-container-desc">
+                <span>Review: </span>Date of submission of the review.
+            </div>
+            <div class ="home-container-desc">
+                <span>Purchase: </span>Date of purchase of the product.
+            </div>
+            <div class ="home-container-desc">
+                <span>Text: </span>Full written review.
+            </div>
+        </div>
+    </div>
 
+    <div class ="content" id = "main-table">
+        <div class = "home-container">
+            <div class = "home-container-title">Filter</div>
+            <form action = "/product-page/{{id}}" method = "POST" class = "home-container-buttons">
+                <input type = "text" name = "filter_text" id = "filter_text" class="reverse">
+                <select id="filter_category" name = "filter_category">
+                    <option></option>
+                    <option value="author_name">Author</option>
+                    <option value="score_count">Rating</option>
+                    <option value="advantages">Upsides</option>
+                    <option value="disadvantages">Downsides</option>
+                    <option value="opinion_text">Text</option>
+                </select>
+                <input type = "submit" value = "Filter">
+
+            </form>
+        </div>
+            {{sort_table}}
+        </div>
+        
     </div>
 {% endblock%}

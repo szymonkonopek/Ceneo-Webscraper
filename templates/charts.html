@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+
+
+
+{% block body %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    
+    
+    <div class = "content">
+        <div class = "content-title">Charts</div>
+        {{tasks[0].product_name}}
+        <a href="/">home</a>
+        <canvas id="recommendChart" width="400" height="400"></canvas>
+        <canvas id="ratingChart" width="400" height="400"></canvas>
+        <canvas id="confirmedChart" width="400" height="400"></canvas>
+        <canvas id="upsidesChart" width="400" height="400"></canvas>
+        <canvas id="downsidesChart" width="400" height="400"></canvas>
+
+    </div>
+
+    <script src="{{url_for('static', filename='config.js')}}"></script>
+    <script src="{{url_for('static', filename='Charts.js')}}"></script>
+    <script>
+        loadData({{data | safe}})
+    </script>
+{% endblock%}

@@ -1,16 +1,25 @@
 {% extends 'base.html' %}
 
 
-{% block title %}
-    <h1>Ceneo</h1>
-{% endblock%}
-
 {% block body %}
     <div class = "content">
-        <h1>Index</h1>
-        <a href="/extraction">Extraction</a>
-        <a href="/product-list">Product List</a>
-        <a href="/author">author</a>
-        
+        <div class = "home-container">
+            <div class = "home-container-title">Extract and Save <br/> Ceneo Reviews Easily!</div>
+            <div class = "home-container-desc">Fast and easy way to extract any reviews from any Ceneo <br/> product and display essential statistics in charts.<br/>Days of manually copying each review are gone.</div>
+            <div class = "home-container-buttons">
+                <a href="/extraction" >Extraction</a>
+                <a href="/product-list" class="reverse">Products</a>
+            </div>
+        </div>
     </div>
+    <div class = "content">
+        <div class = "home-container">
+            <div class = "home-container-title">About Creator</div>
+            <div class = "home-container-desc">Short description of the author of the page. </div>
+            <div class = "home-container-buttons">
+                <a href="/author" >Explore</a>
+            </div>
+        </div>
+    </div>
+
 {% endblock%}

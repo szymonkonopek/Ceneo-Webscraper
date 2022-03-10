@@ -7,11 +7,19 @@
 
 {% block body %}
     <div class = "content">
-        <form action = "/extraction" method = "POST">
-            <input type = "text" name = "content" id = "content">
-            <input type = "submit" value = "Get Reviews">
-        </form>
-        <a href="/">Home</a>
-
+        <div class = "home-container">
+            <div class = "home-container-title">Extraction</div>
+            <div class = "home-container-desc">Paste valid Ceneo id into the field below.</div>
+            <form action = "/extraction" method = "POST" class = "home-container-buttons">
+                <input type = "text" name = "content" id = "content" class="reverse"">
+                <input type = "submit" value = "Get Reviews">
+            </form>
+        </div>
+    </div>
+    <div class = "content">
+        <div class = "home-container">
+            <div class = "home-container-title">Exaples</div>
+            <div class = "home-container-desc"><span>Samsung TV</span> : 104942408<br/><span>Xiaomi Band</span> : 118926112 <br/><span>Windows 10 Home</span> : 91518751</div>
+        </div>
     </div>
 {% endblock%}

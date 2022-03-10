@@ -7,7 +7,7 @@ import json
 from datetime import datetime
 
 class Opinion:
-    def __init__(self,product_id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name):
+    def __init__(self,product_id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name, data_entry_id):
         self.product_id = product_id
         self.opinion_text = opinion_text
         self.author_name = author_name
@@ -21,13 +21,21 @@ class Opinion:
         self.advantages = advantages
         self.disadvantages = disadvantages
         self.product_name = product_name
+        self.data_entry_id = data_entry_id
     
     def get_data(self):
         return {"product_id" : self.product_id,"author_name" : self.author_name, "opinion_text" : self.opinion_text,
         "recommended" : self.recommended, "score_count":self.score_count,
         "credibility" : self.credibility, "purchase_date" : self.purchase_date, "review_date" : self.review_date,
         "upvotes" : self.upvotes, "downvotes" : self.downvotes,
-        "advantages" : self.advantages,"disadvantages" : self.disadvantages, "product_name" : self.product_name}
+        "advantages" : self.advantages,"disadvantages" : self.disadvantages, "product_name" : self.product_name, "data_entry_id" : self.data_entry_id}
+
+    def get_data_for_json(self):
+        return {"product_id" : self.product_id,"author_name" : self.author_name, "opinion_text" : self.opinion_text,
+        "recommended" : self.recommended, "score_count":self.score_count,
+        "credibility" : self.credibility, "purchase_date" : str(self.purchase_date), "review_date" : str(self.review_date),
+        "upvotes" : self.upvotes, "downvotes" : self.downvotes,
+        "advantages" : self.advantages,"disadvantages" : self.disadvantages, "product_name" : self.product_name, "data_entry_id" : self.data_entry_id}
 
 class Product:
     def __init__(self,id):
@@ -59,12 +67,13 @@ class Product:
             url = f"https://www.ceneo.pl/{self.id}/opinie-{opinion_page}"
             req = requests.get(url, headers)
             soup = BeautifulSoup(req.content, 'html.parser')
-
+            
             temp_opinions = soup.find_all("div",{"class" : "user-post user-post__card js_product-review"})
             
             for opinion in temp_opinions:
-                author_name = opinion.find("span",{"class" : "user-post__author-name"}).get_text()
-                opinion_text = opinion.find("div",{"class" : "user-post__text"}).get_text()
+                data_entry_id = opinion.attrs["data-entry-id"]
+                author_name = opinion.find("span",{"class" : "user-post__author-name"}).get_text().capitalize()
+                opinion_text = opinion.find("div",{"class" : "user-post__text"}).get_text().strip().capitalize()
                 score_count = opinion.find("span",{"class" : "user-post__score-count"}).get_text()
                 upvotes = opinion.find("button", {"class" : "vote-yes js_product-review-vote js_vote-yes"}).find("span").get_text()
                 downvotes = opinion.find("button", {"class" : "vote-no js_product-review-vote js_vote-no"}).find("span").get_text()
@@ -108,7 +117,7 @@ class Product:
                         disadvantages.append(comment.get_text())
                     disadvantages = ','.join(disadvantages)
 
-                self.add_opinion(Opinion(self.id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name))
+                self.add_opinion(Opinion(self.id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name, data_entry_id))
                 print(str(opinion_text), end="\n\n")
 
             opinion_page += 1
@@ -124,10 +133,14 @@ class Product:
         json_obj = {"all_opinions" : []}
         data_array = []
         for opinion in self.opinions:
-            data = opinion.get_data()
+            data = opinion.get_data_for_json()
             data_array.append(data)
 
         json_obj["all_opinions"].append({"id" : self.id, "opinions" : data_array})
-        return json.dumps(json_obj, indent = 4)
+        return json.dumps(json_obj, indent = 4, ensure_ascii=False).encode('utf8')
+
+#prod = Product("87640813")
+#data = prod.download_opinions()
+#prod.create_json()
 
 print("hello")
