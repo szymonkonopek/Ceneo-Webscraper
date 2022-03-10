@@ -16,6 +16,10 @@
         <table>
             <tr>
                 <th>Products</th>
+                <th>Opinions</th>
+                <th>Upsides</th>
+                <th>Downsides</th>
+                <th>Average Score</th>
                 <th>JSON</th>
                 <th>Delete</th>
             </tr>
@@ -24,6 +28,18 @@
                     <tr>
                         <td>
                             <a href="/product-page/{{product['id']}}">{{ product["name"] }}</a>
+                        </td>
+                        <td>
+                            {{product["number_of_opinions"]}}
+                        </td>
+                        <td>
+                            {{product["number_of_upsides"]}}
+                        </td>
+                        <td>
+                            {{product["number_of_downsides"]}}
+                        </td>
+                        <td>
+                            {{product["average_score"]}}
                         </td>
                         <td>
                             <a href="/download-json/{{product['id']}}">Download</a>

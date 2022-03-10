@@ -44,6 +44,10 @@ body, html {
   font-weight: bold;
 }
 
+.home-container-error {
+  color: red;
+}
+
 .home-container-desc {
   margin-bottom: 1.5em;
 }
@@ -54,7 +58,7 @@ body, html {
   display: flex;
 }
 
-.home-container-buttons a, .home-container-buttons input {
+.home-container-buttons a, .home-container-buttons input, .home-container-buttons select {
   background-color: #3f70d1;
   color: #ffffff;
   padding: 15px;
@@ -65,6 +69,10 @@ body, html {
   cursor: pointer;
 }
 
+.home-container-buttons option {
+  color: #3f70d1;
+}
+
 .home-container-buttons .reverse {
   background-color: #ffffff;
   color: black;
@@ -73,10 +81,6 @@ body, html {
 
 .home-container span {
   font-weight: bold;
-}
-
-.footer {
-  background-color: red;
 }
 
 .content {

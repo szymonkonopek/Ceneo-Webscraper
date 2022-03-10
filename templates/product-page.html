@@ -13,6 +13,7 @@
             <div class = "home-container-desc">Click below to view all the charts.</div>
             <div class = "home-container-buttons">
                 <a href="/product-page/{{id}}/charts">Statistics</a>
+                <a href="/download-json/{{id}}" class="reverse">Download JSON</a>
             </div>
         </div>
     </div>
@@ -58,7 +59,7 @@
             <div class = "home-container-title">Filter</div>
             <form action = "/product-page/{{id}}" method = "POST" class = "home-container-buttons">
                 <input type = "text" name = "filter_text" id = "filter_text" class="reverse">
-                <select id="filter_category" name = "filter_category">
+                <select id="filter_category" name = "filter_category" class = "reverse">
                     <option></option>
                     <option value="author_name">Author</option>
                     <option value="score_count">Rating</option>
@@ -67,11 +68,18 @@
                     <option value="opinion_text">Text</option>
                 </select>
                 <input type = "submit" value = "Filter">
-
             </form>
+            
         </div>
+        <div class = "home-container-desc">Click on the column's title to sort!</div>
             {{sort_table}}
         </div>
+
+        <script>
+            if ("{{anchor}}" != ""){
+                location.hash = "#" + "{{anchor}}"
+            }
+        </script>
         
     </div>
 {% endblock%}

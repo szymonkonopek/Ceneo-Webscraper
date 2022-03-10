@@ -44,7 +44,7 @@ class SortableTable(Table):
     usefulnes = Col("USEFULNESS")
     upsides = Col('UPSIDES')
     downsides = Col("DOWNSIDES")
-    confirmed = Col('Confirmed')
+    confirmed = Col('CONFIRMED')
     date = Col("REVIEW")
     usage = Col("PURCHASE")
     review = Col("TEXT")
@@ -61,16 +61,24 @@ class SortableTable(Table):
 @app.route('/extraction',methods = ['POST', 'GET'])
 def extraction():
     if request.method == "POST":
+        old_tasks = Ceneo.query.order_by(Ceneo.date_created).all()
         form_content = request.form['content'] #content z form z html
         try:
-            print("done")
             prod_obj = Product(form_content)
             opinions = prod_obj.download_opinions()
             tasks = []
             
+            comments_ids = []
+            for old_task in old_tasks:
+                if old_task.product_id == opinions[0].get_data()["product_id"]:
+                    comments_ids.append(old_task.data_entry_id)
+            
 
             for opinion in opinions:
                 data = opinion.get_data()
+                if (data["data_entry_id"] in comments_ids):
+                    continue
+
                 author_name = data["author_name"]
                 opinion_text = data["opinion_text"]
                 product_id = data["product_id"]
@@ -98,10 +106,10 @@ def extraction():
             return redirect(f'/product-page/{prod_obj.id}')
         except Exception as e:
             print(e)
-            return redirect('/extraction')
+            return render_template('extraction.html', error = "Something went wrong :(")
 
     else:
-        tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
+        tasks = Ceneo.query.order_by(Ceneo.date_created).all()
         return render_template('extraction.html', tasks = tasks)
 
 
@@ -156,13 +164,29 @@ def index():
 
 @app.route('/product-list')
 def product_list():
-    tasks = Ceneo.query.order_by(Ceneo.date_created).all() #zwraca wszystkie elementy posortowane po dacie stworzenia (all wszystkie , first pierwsze)
+    tasks = Ceneo.query.order_by(Ceneo.date_created).all()
     unique_ids = []
     unique_products = []
+
+    def to_float(score):
+        score = score[:-2]
+        score = score.replace(",",".")
+        return float(score)
+
+
     for task in tasks:
         if task.product_id not in unique_ids:
             unique_ids.append(str(task.product_id))
-            unique_products.append({"id": task.product_id,"name": task.product_name })
+            opinions = Ceneo.query.order_by(Ceneo.date_created).filter(Ceneo.product_id == task.product_id)
+            number_of_downsides = 0
+            number_of_upsides = 0
+            score_sum = 0
+            for opinion in opinions:
+                number_of_upsides += len(opinion.advantages.split(',')) if len(opinion.advantages) > 1 else 0
+                number_of_downsides += len(opinion.disadvantages.split(',')) if len(opinion.disadvantages) > 1 else 0
+                score_sum += to_float(opinion.score_count)
+
+            unique_products.append({"id": task.product_id,"name": task.product_name, "number_of_opinions" : opinions.count(), "number_of_downsides" : number_of_downsides, "number_of_upsides" : number_of_upsides, "average_score" : round(score_sum/opinions.count(),1) })
 
     return render_template('product-list.html', unique_products = unique_products)
 
@@ -177,6 +201,7 @@ def product_page(id):
     filter_text = False
     filter_category = False
     product_name = ""
+    anchor = ""
     
     if request.method == "POST":
         filter_text = request.form['filter_text'] #content z form z html
@@ -184,8 +209,8 @@ def product_page(id):
 
     
     if filter_text and filter_category:
-        tasks = Ceneo.query.order_by(Ceneo.date_created).filter(eval(str(getattr(Ceneo,filter_category))) == filter_text)
-        print()
+        tasks = Ceneo.query.order_by(Ceneo.date_created).filter(eval(str(getattr(Ceneo,filter_category))).contains(filter_text))
+        anchor = "main-table"
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() 
     
@@ -217,18 +242,34 @@ def product_page(id):
     output_dict = df.to_dict(orient='records')
 
     sort_table = SortableTable(output_dict,sort_by=sort,sort_reverse=reverse)
-    if filter_text and filter_category:
-        return render_template('product-page.html', id = str(id), sort_table = sort_table, product_name = product_name, _anchor='main-table')
-    else:
-        return render_template('product-page.html', id = str(id), sort_table = sort_table, product_name = product_name)
+    
+    return render_template('product-page.html', id = str(id), sort_table = sort_table, product_name = product_name, anchor = anchor)
         
 @app.route('/product-page/<int:id>/charts')
 def charts(id):
     tasks = Ceneo.query.order_by(Ceneo.date_created).all()
     tasks_array = []
+    positive = 0
+    num_of_cur_prod = 0
+    num_of_char = 0
+    score = 0
+    confirmed_purchases = 0
+
+    def to_float(score):
+        score = score[:-2]
+        score = score.replace(",",".")
+        return float(score)
+
     for task in tasks:
         if task.product_id == str(id):
+            num_of_cur_prod += 1
             tasks_array.append(task)
+            num_of_char += len(task.opinion_text)
+            score += to_float(task.score_count)
+            if task.recommended == True:
+                positive += 1
+            if task.credibility == True:
+                confirmed_purchases += 1
 
     def get_labels_and_values(col):
         unique_items = []
@@ -272,15 +313,17 @@ def charts(id):
                     all_updown_elements.append(updown_list_el)
         return all_updown_elements
 
+    satisfaction = str(int((positive/num_of_cur_prod)*100)) +  "%"
     
-    recommend = get_labels_and_values([row.recommended for row in tasks])
-    rating = get_labels_and_values([row.score_count for row in tasks])
-    confirmed = get_labels_and_values([row.credibility for row in tasks])
-    upsides = get_labels_and_values(get_updowns([row.advantages for row in tasks]))
-    downsides = get_labels_and_values(get_updowns([row.disadvantages for row in tasks]))
+    recommend = get_labels_and_values([row.recommended for row in tasks_array])
+    rating = get_labels_and_values([to_float(row.score_count) for row in tasks_array])
+    confirmed = get_labels_and_values([row.credibility for row in tasks_array])
+    upsides = get_labels_and_values(get_updowns([row.advantages for row in tasks_array]))
+    downsides = get_labels_and_values(get_updowns([row.disadvantages for row in tasks_array]))
     data = {"recommend" : recommend, "rating" : rating, "confirmed" : confirmed, "upsides" : upsides, "downsides" : downsides }
+    stats = {"satisfaction" : satisfaction, "num_of_char" : num_of_char,"average_char" : int(num_of_char/num_of_cur_prod) , "average_score" : round(float(score/num_of_cur_prod),1), "num_of_cur_prod" : num_of_cur_prod, "confirmed" : round((confirmed_purchases/num_of_cur_prod)*100,1)}
 
-    return render_template('charts.html', id = str(id), tasks = tasks_array,data = data)
+    return render_template('charts.html', id = str(id), tasks = tasks_array,data = data, stats = stats)
 
 @app.route('/download-json/<int:id>/')
 def download_json(id):

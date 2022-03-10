@@ -29,6 +29,11 @@ body, html {
         margin-bottom: 0.25em;
         font-weight: bold;
     }
+
+    &-error {
+        color :red
+    }
+    
     &-desc{
         margin-bottom: 1.5em;
     }
@@ -36,7 +41,7 @@ body, html {
         
         display: flex;
 
-        a, input{
+        a, input, select{
             background-color: #3f70d1;;
             color:#ffffff;
             padding:15px;
@@ -45,6 +50,10 @@ body, html {
             margin-right: 1em;
             font-size: 1.1em;
             cursor: pointer;
+
+        }
+        option{
+            color:#3f70d1;
         }
 
         .reverse{
@@ -58,10 +67,6 @@ body, html {
         font-weight: bold;
     }
 
-}
-
-.footer{
-    background-color: red;
 }
 
 .content {

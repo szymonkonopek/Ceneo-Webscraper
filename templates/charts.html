@@ -9,15 +9,53 @@
     
     
     <div class = "content">
-        <div class = "content-title">Charts</div>
-        {{tasks[0].product_name}}
-        <a href="/">home</a>
-        <canvas id="recommendChart" width="400" height="400"></canvas>
-        <canvas id="ratingChart" width="400" height="400"></canvas>
-        <canvas id="confirmedChart" width="400" height="400"></canvas>
-        <canvas id="upsidesChart" width="400" height="400"></canvas>
-        <canvas id="downsidesChart" width="400" height="400"></canvas>
-
+        <div class = "home-container">
+            <div class = "home-container-title">{{tasks[0].product_name}}</div>
+            <div class = "home-container-title">Charts statistics</div>
+            <div class = 'home-container-desc'>There are <span>6</span> dynamicly created charts (made with Chart.js)</div>
+            <div class = 'home-container-desc'><span>{{stats.satisfaction}}</span> of customers are satisfied with their purchase.</div>
+            <div class = 'home-container-desc'>Average review has <span>{{stats.average_char}}</span> characters.</div>
+            <div class = 'home-container-desc'>There are <span>{{stats.num_of_cur_prod}}</span> reviews with total of <span>{{stats.num_of_char}}</span> characters.</div>
+            <div class = 'home-container-desc'>Average score for this product is <span>{{stats.average_score}}</span> out of <span>5</span>.</div>
+            <div class = "home-container-buttons">
+                <a href = '/product-page/{{id}}' class = "reverse">back</a>
+            </div>
+        </div>
+    </div>
+    <div class ="content">
+        <div class = "home-container">
+            <div class = "home-container-title">Customer Satisfation</div>
+            <div class = "home-container-desc">True = Satisfied, False = Unsatisfied. Average score <span>{{stats.satisfaction}}</span></div>
+            <canvas id="recommendChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <div class ="content">
+        <div class = "home-container">
+            <div class = "home-container-title">Average Score</div>
+            <div class = "home-container-desc">Average score for this product <span>({{stats.average_score}})</span></div>
+            <canvas id="ratingChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <div class ="content">
+        <div class = "home-container">
+            <div class = "home-container-title">Confirmed Purchases</div>
+            <div class = "home-container-desc">True = Confirmed, False = Unconfirmed. Percentage of confirmed reviews <span>{{stats.confirmed}}%</span></div>
+            <canvas id="confirmedChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <div class ="content">
+        <div class = "home-container">
+            <div class = "home-container-title">Most liked feature</div>
+            <div class = "home-container-desc">...which is <span> {{data["upsides"]["items"][0] | safe}} </span></div>
+            <canvas id="upsidesChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+    <div class ="content">
+        <div class = "home-container">
+            <div class = "home-container-title">Most disliked feature</div>
+            <div class = "home-container-desc">...which is <span> {{data["downsides"]["items"][0] | safe}} </span></div>
+            <canvas id="downsidesChart" width="400" height="400"></canvas>
+        </div>
     </div>
 
     <script src="{{url_for('static', filename='config.js')}}"></script>
