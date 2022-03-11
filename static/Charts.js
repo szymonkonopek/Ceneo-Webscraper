@@ -188,7 +188,6 @@ function getData() {
         },
     };
     
-
     return {
         recommend: recommend_config,
         rating: rating_config,
@@ -197,8 +196,6 @@ function getData() {
         downsides: downsides_config
     };
 }
-
-
 
 function loadData(data){
     recommend = data.recommend

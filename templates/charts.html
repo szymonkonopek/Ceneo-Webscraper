@@ -22,6 +22,7 @@
             </div>
         </div>
     </div>
+    
     <div class ="content">
         <div class = "home-container">
             <div class = "home-container-title">Customer Satisfation</div>
@@ -43,6 +44,7 @@
             <canvas id="confirmedChart" width="400" height="400"></canvas>
         </div>
     </div>
+    {% if data["upsides"]["items"]%}
     <div class ="content">
         <div class = "home-container">
             <div class = "home-container-title">Most liked feature</div>
@@ -50,6 +52,8 @@
             <canvas id="upsidesChart" width="400" height="400"></canvas>
         </div>
     </div>
+    {% endif %}
+    {% if data["downsides"]["items"]%}
     <div class ="content">
         <div class = "home-container">
             <div class = "home-container-title">Most disliked feature</div>
@@ -57,6 +61,7 @@
             <canvas id="downsidesChart" width="400" height="400"></canvas>
         </div>
     </div>
+    {% endif %}
 
     <script src="{{url_for('static', filename='config.js')}}"></script>
     <script src="{{url_for('static', filename='Charts.js')}}"></script>

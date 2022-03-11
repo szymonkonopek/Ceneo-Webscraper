@@ -1,13 +1,11 @@
-from asyncio import tasks
 from urllib import request
 from flask import Flask, render_template, url_for, request, redirect ,Response
-from flask_table import Table, Col
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from soup import Product
+from product import Product
 import pandas as pd
 from unidecode import unidecode
-from IPython.core.display import display, HTML
+from sortableTable import SortableTable
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ceneo.db'
@@ -37,43 +35,30 @@ class Ceneo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
 
-class SortableTable(Table):
-    author = Col('AUTHOR')
-    opinion = Col('OPINION')
-    rating = Col('RATING')
-    usefulnes = Col("USEFULNESS")
-    upsides = Col('UPSIDES')
-    downsides = Col("DOWNSIDES")
-    confirmed = Col('CONFIRMED')
-    date = Col("REVIEW")
-    usage = Col("PURCHASE")
-    review = Col("TEXT")
+#default route
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-    allow_sort = True
-
-    def sort_url(self, col_key, reverse=False):
-        if reverse:
-            direction = 'desc'
-        else:
-            direction = 'asc'
-        return url_for(request.endpoint, **request.view_args, sort=col_key, direction=direction, _anchor='main-table')
 
 @app.route('/extraction',methods = ['POST', 'GET'])
 def extraction():
+    #after clicking "get reviews" button.
     if request.method == "POST":
-        old_tasks = Ceneo.query.order_by(Ceneo.date_created).all()
-        form_content = request.form['content'] #content z form z html
+        old_tasks = Ceneo.query.order_by(Ceneo.date_created).all() #database
+        form_content = request.form['content'] #content from HTML form
         try:
             prod_obj = Product(form_content)
             opinions = prod_obj.download_opinions()
             tasks = []
             
+            #get possbile comments IDs with the same product_id as in current (old) database
             comments_ids = []
             for old_task in old_tasks:
                 if old_task.product_id == opinions[0].get_data()["product_id"]:
                     comments_ids.append(old_task.data_entry_id)
             
-
+            #if there's already a review with the same ID (data_entry_id), skip that one, allowing for adding possbile new comments for the old product.
             for opinion in opinions:
                 data = opinion.get_data()
                 if (data["data_entry_id"] in comments_ids):
@@ -94,6 +79,7 @@ def extraction():
                 product_name = data["product_name"]
                 data_entry_id = data["data_entry_id"]
 
+                #create Ceneo database object and add it to Ceneo.db database
                 task = Ceneo(author_name = author_name, opinion_text = opinion_text, product_id = product_id,
                 recommended = recommended, score_count=score_count, credibility=credibility,upvotes=upvotes,
                 downvotes=downvotes,purchase_date=purchase_date,review_date=review_date,advantages=advantages,
@@ -106,31 +92,17 @@ def extraction():
             return redirect(f'/product-page/{prod_obj.id}')
         except Exception as e:
             print(e)
+            #if invalid product id, display proper information
             return render_template('extraction.html', error = "Something went wrong :(")
-
     else:
-        tasks = Ceneo.query.order_by(Ceneo.date_created).all()
-        return render_template('extraction.html', tasks = tasks)
-
-
-@app.route('/delete/<int:product_id>/<int:id>/<int:length>')
-def delete(product_id,id,length):
-    task_to_delete = Ceneo.query.get_or_404(id)
-
-    try:
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        if length > 1:
-            return redirect(f'/product-page/{product_id}')
-        else:
-            return redirect('/product-list')
-    except:
-        return "There was an error :("
+        #when entering from navbar
+        return render_template('extraction.html')
 
 @app.route('/delete-page/<int:id>')
 def delete_page(id):
     tasks = Ceneo.query.order_by(Ceneo.date_created).all()
     tasks_ids = []
+    #search for opinions(tasks) with the specific product_id and delete them.
     for task in tasks:
         if task.product_id == str(id):
             tasks_ids.append(task.id)
@@ -143,25 +115,6 @@ def delete_page(id):
             print("problem")
     return redirect("/product-list")
 
-@app.route('/update/<int:id>', methods = ['GET','POST'])
-def update(id):
-    task = Ceneo.query.get_or_404(id)
-
-    if request.method == 'POST':
-        task.author_name = request.form['content']
-
-        try:
-            db.session.commit()
-            return redirect('/extraction')
-        except:
-            return "Error updating :("
-    else:
-        return render_template('update.html',task = task)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 @app.route('/product-list')
 def product_list():
     tasks = Ceneo.query.order_by(Ceneo.date_created).all()
@@ -173,7 +126,7 @@ def product_list():
         score = score.replace(",",".")
         return float(score)
 
-
+    #prepare data, create unique_products dictionary for product-list page
     for task in tasks:
         if task.product_id not in unique_ids:
             unique_ids.append(str(task.product_id))
@@ -197,24 +150,23 @@ def author():
 @app.route('/product-page/<int:id>', methods = ['GET','POST'])
 def product_page(id):
     
-    
     filter_text = False
     filter_category = False
     product_name = ""
     anchor = ""
     
+    #when filtering for text
     if request.method == "POST":
-        filter_text = request.form['filter_text'] #content z form z html
-        filter_category = request.form['filter_category'] #content z form z html
+        filter_text = request.form['filter_text']
+        filter_category = request.form['filter_category'] 
 
-    
     if filter_text and filter_category:
         tasks = Ceneo.query.order_by(Ceneo.date_created).filter(eval(str(getattr(Ceneo,filter_category))).contains(filter_text))
         anchor = "main-table"
     else:
         tasks = Ceneo.query.order_by(Ceneo.date_created).all() 
     
-
+    #prepare data for table
     tasks_array = []
     for task in tasks:
         if task.product_id == str(id):
@@ -233,7 +185,8 @@ def product_page(id):
 
             tasks_array.append(task_array)
     
-    df = pd.DataFrame(tasks_array, columns=["author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "date", "usage", "review"])
+    #Panda dataframe, used for creating sortable columns.
+    df = pd.DataFrame(tasks_array, columns=["author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "review", "purchase", "text"])
 
     sort = request.args.get('sort', 'author')
     reverse = (request.args.get('direction', 'asc') == 'desc')
@@ -271,6 +224,7 @@ def charts(id):
             if task.credibility == True:
                 confirmed_purchases += 1
 
+    #input = 1 dimensional array/list with repeating names
     def get_labels_and_values(col):
         unique_items = []
         item_count = []
@@ -303,7 +257,9 @@ def charts(id):
             
         
         return {"items": unique_items,"count":item_count}
+    #output = dictionary with ascendingly sorted values (bubble sort) with labels and values arrays, prepared for Chart.js 
 
+    #format upsides / downsides from string to list
     def get_updowns(updowns):
         all_updown_elements = []
         for updown in updowns:
@@ -336,7 +292,6 @@ def download_json(id):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    # note that we set the 404 status explicitly
     return render_template('404.html'), 404
 
 if __name__ == "__main__":
