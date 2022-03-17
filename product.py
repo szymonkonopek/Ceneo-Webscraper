@@ -74,18 +74,22 @@ class Product:
                 columns = opinion.find_all("div",{"class" : "review-feature__col"})
                 advantages = ""
                 disadvantages = ""
-                if len(columns) > 0:
-                    advantages = []
-                    col1 = columns[0].find_all("div",{"class" : "review-feature__item"})
-                    for comment in col1:
-                        advantages.append(comment.get_text())
-                    advantages = ','.join(advantages)
-                if len(columns) == 2:
-                    disadvantages = []
-                    col2 = columns[1].find_all("div",{"class" : "review-feature__item"})
-                    for comment in col2:
-                        disadvantages.append(comment.get_text())
-                    disadvantages = ','.join(disadvantages)
+
+                for column in columns:
+                    title = column.find("div",{"class" : "review-feature__title"}).get_text()
+                    if title == "Zalety":
+                        advantages = []
+                        col1 = column.find_all("div",{"class" : "review-feature__item"})
+                        for comment in col1:
+                            advantages.append(comment.get_text())
+                        advantages = ','.join(advantages)
+                    if title == "Wady":
+                        disadvantages = []
+                        col2 = column.find_all("div",{"class" : "review-feature__item"})
+                        for comment in col2:
+                            disadvantages.append(comment.get_text())
+                        disadvantages = ','.join(disadvantages)
+
 
                 #create Opinion object
                 self.add_opinion(Opinion(self.id,opinion_text,author_name,recommended,score_count,credibility,purchase_date,review_date,upvotes,downvotes,advantages,disadvantages,product_name, data_entry_id))
