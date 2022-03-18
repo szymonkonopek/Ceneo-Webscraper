@@ -171,6 +171,7 @@ def product_page(id):
     for task in tasks:
         if task.product_id == str(id):
             task_array = []
+            task_array.append(task.data_entry_id)
             task_array.append(unidecode(task.author_name))
             task_array.append("POSITIVE" if task.recommended else "NEGATIVE")
             task_array.append(task.score_count)
@@ -186,7 +187,7 @@ def product_page(id):
             tasks_array.append(task_array)
     
     #Panda dataframe, used for creating sortable columns.
-    df = pd.DataFrame(tasks_array, columns=["author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "review", "purchase", "text"])
+    df = pd.DataFrame(tasks_array, columns=["id","author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "review", "purchase", "text"])
 
     sort = request.args.get('sort', 'author')
     reverse = (request.args.get('direction', 'asc') == 'desc')

@@ -2,6 +2,7 @@ from flask_table import Table, Col
 from flask import url_for, request
 
 class SortableTable(Table):
+    id = Col("ID")
     author = Col('AUTHOR')
     opinion = Col('OPINION')
     rating = Col('RATING')
