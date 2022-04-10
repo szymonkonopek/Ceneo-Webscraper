@@ -187,11 +187,7 @@ def product_page(id):
             tasks_array.append(task_array)
     
     #Panda dataframe, used for creating sortable columns.
-<<<<<<< HEAD
-    df = pd.DataFrame(tasks_array, columns=["id", "author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "review", "purchase", "text"])
-=======
     df = pd.DataFrame(tasks_array, columns=["id","author", "opinion", "rating", "usefulnes", "upsides", "downsides", "confirmed", "review", "purchase", "text"])
->>>>>>> 09a08ea9f2664f94467f4fdad4efa4fe03d75c65
 
     sort = request.args.get('sort', 'author')
     reverse = (request.args.get('direction', 'asc') == 'desc')
