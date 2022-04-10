@@ -22,8 +22,8 @@ class Ceneo(db.Model):
     credibility = db.Column(db.Boolean(200), nullable = False)
     upvotes = db.Column(db.String(200), nullable = False)
     downvotes = db.Column(db.String(200), nullable = False)
-    purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
-    review_date = db.Column(db.DateTime, default=datetime.utcnow, nullable = True)
+    purchase_date = db.Column(db.String, nullable = True)
+    review_date = db.Column(db.String, nullable = True)
     advantages = db.Column(db.String(200), nullable = False)
     disadvantages = db.Column(db.String(200), nullable = False)
     product_name = db.Column(db.String(200), nullable = False)
@@ -179,8 +179,8 @@ def product_page(id):
             task_array.append(f"({len(task.advantages.split(',')) if len(task.advantages) > 1 else 0}) {task.advantages.replace(',',', ')}")
             task_array.append(f"({len(task.disadvantages.split(',')) if len(task.disadvantages) > 1 else 0}) {task.disadvantages.replace(',',', ')}")
             task_array.append("Yes" if task.credibility else "No")
-            task_array.append(str(task.review_date))
-            task_array.append(str(task.purchase_date))
+            task_array.append(task.review_date)
+            task_array.append(task.purchase_date)
             task_array.append(unidecode(task.opinion_text))
             product_name = task.product_name
 

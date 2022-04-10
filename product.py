@@ -63,13 +63,14 @@ class Product:
                     recommended = False
 
                 #dates
-                dates = opinion.find("span",{"class" : "user-post__published"}).find_all("time") 
-                purchase_date = dates[0].attrs["datetime"]
-                purchase_date = datetime.strptime(purchase_date,"%Y-%m-%d %H:%M:%S") 
-                if len(dates) > 1:
-                    review_date = dates[1].attrs["datetime"]
-                    review_date = datetime.strptime(review_date,"%Y-%m-%d %H:%M:%S")
-                
+                dates = opinion.find("span",{"class" : "user-post__published"}).find_all("time")
+                purchase_date = ""
+                review_date = ""
+                if len(dates) > 0:
+                    purchase_date = dates[0].attrs["datetime"]
+                    if len(dates) > 1:
+                        review_date = dates[1].attrs["datetime"]
+
                 #advantages / disadvantage (upsides / downsides)
                 columns = opinion.find_all("div",{"class" : "review-feature__col"})
                 advantages = ""
