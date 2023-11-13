@@ -8,8 +8,6 @@ from unidecode import unidecode
 from sortableTable import SortableTable
 
 
-
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ceneo.db'
 db = SQLAlchemy(app)
