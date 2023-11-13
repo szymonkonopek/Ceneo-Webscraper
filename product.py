@@ -9,7 +9,8 @@ class Product:
     def __init__(self,id):
         self.id = id
         self.opinions = []
-    
+
+
     def add_opinion(self,opinion):
         self.opinions.append(opinion)
 
