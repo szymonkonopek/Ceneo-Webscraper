@@ -26,7 +26,6 @@ class Ceneo(db.Model):
     advantages = db.Column(db.String(200), nullable = False)
     disadvantages = db.Column(db.String(200), nullable = False)
     product_name = db.Column(db.String(200), nullable = False)
-    
 
     completed = db.Column(db.Integer, default = 0)
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
