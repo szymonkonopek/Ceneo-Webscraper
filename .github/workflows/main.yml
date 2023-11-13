@@ -22,4 +22,4 @@ jobs:
 
       - name: Build and Test
         run: |
-          python -m build --wheel  # Zastąp to polecenie odpowiednim poleceniem do budowy Twojego projektu
+          python -m build --wheel
