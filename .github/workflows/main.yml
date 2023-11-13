@@ -26,6 +26,6 @@ jobs:
       - run: ls
       - uses: ncipollo/release-action@v1.13.0
         with:
-          artifacts: "dist/Ceneo_Webscraper-1.8-py3-none-any.whl"
-          body: my first release
-          name: My pre release for ecommerce application
+          artifacts: "dist/Ceneo_Webscraper-1.9-py3-none-any.whl"
+          body: Ceneo Scraper
+          name: Ceneo scraper
