@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='Ceneo-Webscraper',
-    version='1.1',
+    version='1.8',
     packages=[''],
     url='ceneo.pl',
     license='',
