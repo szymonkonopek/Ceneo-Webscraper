@@ -40,6 +40,7 @@ def index():
     return render_template('index.html')
 
 
+
 @app.route('/extraction',methods = ['POST', 'GET'])
 def extraction():
     #after clicking "get reviews" button.
