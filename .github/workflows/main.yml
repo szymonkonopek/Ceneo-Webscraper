@@ -20,6 +20,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # - name: Build and Test
-      #   run: |
-      #     python your_build_script.py  # Zastąp to polecenie odpowiednim poleceniem do budowy Twojego projektu
+      - name: Build and Test
+        run: |
+          python -m build --wheel  # Zastąp to polecenie odpowiednim poleceniem do budowy Twojego projektu
